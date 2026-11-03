@@ -1,7 +1,19 @@
 import { randomBytes } from 'node:crypto';
+import { mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import type { Page } from 'playwright';
 import { CleanupTracker } from './cleanup.js';
 import { getStepType } from './steps/registry.js';
-import type { OrgClient, OrgInfo, RunSummary, StepResult, TestDefinition, TestResult } from './types.js';
+import type { StepContext } from './steps/step.js';
+import type {
+  BrowserSession,
+  OrgClient,
+  OrgInfo,
+  RunSummary,
+  StepResult,
+  TestDefinition,
+  TestResult,
+} from './types.js';
 import { Variables } from './variables.js';
 
 export type RunEvent =
@@ -14,10 +26,37 @@ export type RunOptions = {
   allowProduction?: boolean;
   /** Called as tests and steps finish, so a CLI can print progress. */
   onEvent?: (event: RunEvent) => void;
+  /**
+   * Opens a logged-in browser. Called once, on the first browser step of the run.
+   * Without it, browser steps fail with a clear message.
+   */
+  browser?: () => Promise<BrowserSession>;
+  /** Folder for screenshots of failed steps. No screenshots when unset. */
+  resultsDir?: string;
   /** Overridable for tests. */
   now?: () => Date;
   runId?: string;
 };
+
+/** Opens the browser session on first use and shares it across tests in a run. */
+class SessionHolder {
+  private session?: Promise<BrowserSession>;
+
+  public constructor(private readonly factory?: () => Promise<BrowserSession>) {}
+
+  public get(): Promise<BrowserSession> {
+    if (!this.factory) {
+      return Promise.reject(new Error('Browser steps need a browser, but this run was started without one'));
+    }
+    this.session ??= this.factory();
+    return this.session;
+  }
+
+  public async close(): Promise<void> {
+    if (this.session) await (await this.session.catch(() => undefined))?.close();
+    this.session = undefined;
+  }
+}
 
 /**
  * Production = not a sandbox, not a Developer Edition (which includes scratch orgs),
@@ -41,11 +80,16 @@ export async function runTests(
   const org = await client.getOrgInfo();
   const runId = options.runId ?? newRunId();
   const results: TestResult[] = [];
+  const sessions = new SessionHolder(options.browser);
 
-  for (const test of tests) {
-    // Sequential: tests share one org and may depend on its state.
-    // eslint-disable-next-line no-await-in-loop
-    results.push(await runTest(test, client, org, { ...options, runId }));
+  try {
+    for (const test of tests) {
+      // Sequential: tests share one org and may depend on its state.
+      // eslint-disable-next-line no-await-in-loop
+      results.push(await runTest(test, client, org, { ...options, runId }, sessions));
+    }
+  } finally {
+    await sessions.close();
   }
 
   return {
@@ -62,7 +106,8 @@ export async function runTest(
   test: TestDefinition,
   client: OrgClient,
   org: OrgInfo,
-  options: RunOptions = {}
+  options: RunOptions = {},
+  sessions: SessionHolder = new SessionHolder(options.browser)
 ): Promise<TestResult> {
   const started = Date.now();
   const emit = options.onEvent ?? ((): void => {});
@@ -71,24 +116,18 @@ export async function runTest(
   const vars = new Variables(now);
   const cleanup = new CleanupTracker();
   const steps: StepResult[] = [];
-  let error: string | undefined;
+
+  // The test's browser page, opened on the first browser step.
+  let page: Promise<{ page: Page; baseUrl: string }> | undefined;
+  const browser = (): Promise<{ page: Page; baseUrl: string }> => {
+    page ??= sessions.get().then(async (session) => ({ page: await session.newPage(), baseUrl: session.baseUrl }));
+    return page;
+  };
+  const ctx: Omit<StepContext, 'raw'> = { client, vars, cleanup, org, startedAt: new Date(started), browser };
 
   emit({ type: 'test:start', test });
 
-  if (isProduction(org) && !options.allowProduction && !test.allowProduction) {
-    error = `Refusing to run against production org ${org.name} (${org.orgId}). Use --allow-production or set "allowProduction: true" in the test.`;
-  } else {
-    try {
-      vars.set('run', {
-        id: runId,
-        date: now().toISOString().slice(0, 10),
-        startedAt: new Date(started).toISOString(),
-      });
-      for (const [name, value] of Object.entries(test.params)) vars.set(name, vars.resolve(value));
-    } catch (e) {
-      error = `params: ${message(e)}`;
-    }
-  }
+  let error = prepare(test, org, options, vars, { id: runId, date: now(), startedAt: new Date(started) });
 
   try {
     let failed = error !== undefined;
@@ -100,7 +139,11 @@ export async function runTest(
       }
       // Steps run in order; each may depend on variables set by the previous one.
       // eslint-disable-next-line no-await-in-loop
-      const result = await runStep(step, base, { client, vars, cleanup });
+      const result = await runStep(step, base, ctx);
+      if (result.status === 'failed' && page && options.resultsDir) {
+        // eslint-disable-next-line no-await-in-loop
+        result.screenshot = await screenshot(page, options.resultsDir, `${slug(test.name)}-step${base.index}.png`);
+      }
       steps.push(result);
       emit({ type: 'step:end', test, step: result });
       failed = result.status === 'failed';
@@ -110,6 +153,7 @@ export async function runTest(
     error = `Unexpected error: ${message(e)}`;
   }
 
+  if (page) await (await page.catch(() => undefined))?.page.close().catch(() => {});
   const cleanupResult = await cleanup.run(client);
   const status = error === undefined && steps.every((s) => s.status === 'passed') ? 'passed' : 'failed';
   const result: TestResult = {
@@ -125,10 +169,36 @@ export async function runTest(
   return result;
 }
 
+/** Production check and built-in/param variables. Returns an error message if the test can't start. */
+function prepare(
+  test: TestDefinition,
+  org: OrgInfo,
+  options: RunOptions,
+  vars: Variables,
+  run: { id: string; date: Date; startedAt: Date }
+): string | undefined {
+  if (isProduction(org) && !options.allowProduction && !test.allowProduction) {
+    return `Refusing to run against production org ${org.name} (${org.orgId}). Use --allow-production or set "allowProduction: true" in the test.`;
+  }
+  try {
+    vars.set('run', {
+      id: run.id,
+      date: run.date.toISOString().slice(0, 10),
+      // SOQL datetime literal format, e.g. 2026-11-03T15:11:14Z
+      startedAt: run.startedAt.toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      userId: org.userId ?? '',
+    });
+    for (const [name, value] of Object.entries(test.params)) vars.set(name, vars.resolve(value));
+    return undefined;
+  } catch (e) {
+    return `params: ${message(e)}`;
+  }
+}
+
 async function runStep(
   step: TestDefinition['steps'][number],
   base: Omit<StepResult, 'status' | 'durationMs'>,
-  ctx: { client: OrgClient; vars: Variables; cleanup: CleanupTracker }
+  ctx: Omit<StepContext, 'raw'>
 ): Promise<StepResult> {
   const started = Date.now();
   const stepType = getStepType(step.type);
@@ -145,6 +215,42 @@ async function runStep(
   }
 }
 
-function message(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+/** Save a screenshot of the test's page; returns the path, or undefined if it couldn't be taken. */
+async function screenshot(page: Promise<{ page: Page }>, dir: string, file: string): Promise<string | undefined> {
+  try {
+    const path = join(dir, file);
+    await mkdir(dir, { recursive: true });
+    await (await page).page.screenshot({ path, timeout: 10_000 });
+    return path;
+  } catch {
+    return undefined;
+  }
+}
+
+/** "Large opp routes to Finance" -> "large-opp-routes-to-finance" */
+export function slug(text: string): string {
+  return (
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60) || 'test'
+  );
+}
+
+/**
+ * Error text for results: no ANSI colours, and Playwright's long call log reduced to
+ * its last distinct reason (e.g. "element is not visible").
+ */
+export function message(error: unknown): string {
+  // eslint-disable-next-line no-control-regex
+  const text = (error instanceof Error ? error.message : String(error)).replace(/\u001b\[[0-9;]*m/g, '');
+  const [head, log] = text.split(/\n\s*Call log:\s*\n/);
+  if (!log) return text.trim();
+  const reasons = log
+    .split('\n')
+    .map((line) => line.replace(/^[\s\d×-]+/, '').trim())
+    .filter((line) => /^element |^locator resolved to/.test(line));
+  const reason = reasons.at(-1)?.slice(0, 160);
+  return reason ? `${head.trim()} (${reason})` : head.trim();
 }

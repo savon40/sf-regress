@@ -34,6 +34,10 @@ export function connectionClient(conn: Connection): OrgClient {
         records: result.records as SfRecord[],
       } satisfies QueryResult;
     },
+    async describeObjects(): Promise<Array<{ name: string; label: string }>> {
+      const result = await call(() => conn.describeGlobal());
+      return result.sobjects.map((s) => ({ name: s.name, label: s.label }));
+    },
     async getOrgInfo(): Promise<OrgInfo> {
       const result = await conn.query<{
         Id: string;
@@ -43,13 +47,22 @@ export function connectionClient(conn: Connection): OrgClient {
         TrialExpirationDate: string | null;
       }>('SELECT Id, Name, OrganizationType, IsSandbox, TrialExpirationDate FROM Organization LIMIT 1');
       const org = result.records[0];
+      const username = conn.getUsername();
+      let userId = conn.getAuthInfoFields().userId;
+      if (!userId && username) {
+        const user = await conn.query<{ Id: string }>(
+          `SELECT Id FROM User WHERE Username = '${username.replace(/'/g, "\\'")}' LIMIT 1`
+        );
+        userId = user.records[0]?.Id;
+      }
       return {
         orgId: org.Id,
         name: org.Name,
         organizationType: org.OrganizationType,
         isSandbox: org.IsSandbox,
         trialExpirationDate: org.TrialExpirationDate,
-        username: conn.getUsername(),
+        username,
+        userId,
         instanceUrl: conn.instanceUrl,
       };
     },

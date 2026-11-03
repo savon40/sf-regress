@@ -1,0 +1,529 @@
+{
+  "baseUrl": "https://example.lightning.force.com",
+  "startedAt": "2026-11-03T15:11:14.755Z",
+  "actions": [
+    {
+      "name": "openPage",
+      "url": "about:blank",
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18"
+    },
+    {
+      "name": "navigate",
+      "url": "https://example.lightning.force.com/lightning/o/Account/list",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=grid[name=\"Recently Viewed\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18"
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"New\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=group[name=\"Billing Address\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "New"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Account Name\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Account Name"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Account Name\"i]",
+      "text": "Regress Fixture Co",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=tab[name=\"* New Account\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Account Name"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=combobox[name=\"Industry\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=listbox[name=\"Industry\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "combobox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Industry"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "[id=\"1194:0\"]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Undo Industry\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "default",
+        "body": "[id=\"1194:0\"]",
+        "options": {}
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=combobox[name=\"Rating\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=listbox[name=\"Rating\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "combobox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Rating"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "[id=\"1194:0\"]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Undo Rating\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "default",
+        "body": "[id=\"1194:0\"]",
+        "options": {}
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Phone\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Phone"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Phone\"i]",
+      "text": "555-0100",
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Phone"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"Save\"s]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=article[name=\"Notes & Attachments\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": true,
+          "name": "Save"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"New Contact\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=group[name=\"* Name\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "New Contact"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Last Name *\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Last Name *"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Last Name *\"i]",
+      "text": "Fixture",
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Last Name *"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Email\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Email"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Email\"i]",
+      "text": "fixture@example.com",
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Email"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"Save\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=navigation[name=\"Global Header\"i]"
+        }
+      ],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Save"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=tab[name=\"Details\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18",
+      "locator": {
+        "kind": "role",
+        "body": "tab",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Details"
+        }
+      }
+    },
+    {
+      "name": "closePage",
+      "signals": [],
+      "pageGuid": "page@7d1e327043cf463d5855cb574c9dbf18"
+    }
+  ],
+  "events": [
+    {
+      "t": 1793718677995,
+      "url": "https://example.lightning.force.com/lightning/o/Account/list",
+      "role": "button",
+      "name": "New",
+      "value": null,
+      "ids": ["brandBand_2", "562:0", "391:0", "443:0"],
+      "field": null,
+      "dialog": null
+    },
+    {
+      "t": 1793718681816,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["input-308", "sectionContent-291", "brandBand_3", "1344:0", "1194:0", "1246:0"],
+      "field": "Account Name",
+      "dialog": null
+    },
+    {
+      "t": 1793718684387,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "combobox",
+      "name": "Industry",
+      "value": "--None--",
+      "ids": ["combobox-button-358", "sectionContent-291", "brandBand_3", "1344:0", "1194:0", "1246:0"],
+      "field": "Industry",
+      "dialog": null
+    },
+    {
+      "t": 1793718685748,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "option",
+      "name": "Banking",
+      "value": "Banking",
+      "ids": [
+        "combobox-button-358-3-358",
+        "dropdown-element-358",
+        "sectionContent-291",
+        "brandBand_3",
+        "1344:0",
+        "1194:0",
+        "1246:0"
+      ],
+      "field": "Industry",
+      "dialog": null
+    },
+    {
+      "t": 1793718687098,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "combobox",
+      "name": "Rating",
+      "value": "--None--",
+      "ids": ["combobox-button-301", "sectionContent-291", "brandBand_3", "1344:0", "1194:0", "1246:0"],
+      "field": "Rating",
+      "dialog": null
+    },
+    {
+      "t": 1793718688462,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "option",
+      "name": "Hot",
+      "value": "Hot",
+      "ids": [
+        "combobox-button-301-1-301",
+        "dropdown-element-301",
+        "sectionContent-291",
+        "brandBand_3",
+        "1344:0",
+        "1194:0",
+        "1246:0"
+      ],
+      "field": "Rating",
+      "dialog": null
+    },
+    {
+      "t": 1793718689797,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["input-311", "sectionContent-291", "brandBand_3", "1344:0", "1194:0", "1246:0"],
+      "field": "Phone",
+      "dialog": null
+    },
+    {
+      "t": 1793718691982,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033",
+      "role": "button",
+      "name": "Save",
+      "value": null,
+      "ids": ["brandBand_3", "1344:0", "1194:0", "1246:0"],
+      "field": null,
+      "dialog": null
+    },
+    {
+      "t": 1793718696325,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view",
+      "role": "button",
+      "name": "New Contact",
+      "value": null,
+      "ids": ["brandBand_4", "1344:0", "1194:0", "1246:0"],
+      "field": null,
+      "dialog": null
+    },
+    {
+      "t": 1793718700624,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["2899:0", "2772:0", "wrapper-body", "content_2442:0"],
+      "field": null,
+      "dialog": "New Contact"
+    },
+    {
+      "t": 1793718702610,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["2920:0", "2772:0", "wrapper-body", "content_2442:0"],
+      "field": null,
+      "dialog": "New Contact"
+    },
+    {
+      "t": 1793718705093,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view",
+      "role": "button",
+      "name": "Save",
+      "value": null,
+      "ids": ["wrapper-body", "content_2442:0"],
+      "field": null,
+      "dialog": "New Contact"
+    },
+    {
+      "t": 1793718710409,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view",
+      "role": "tab",
+      "name": "Details",
+      "value": null,
+      "ids": ["detailTab__item", "brandBand_4", "1344:0", "1194:0", "1246:0"],
+      "field": null,
+      "dialog": null
+    }
+  ],
+  "navigations": [
+    {
+      "t": 1793718675825,
+      "url": "https://example.lightning.force.com/lightning/o/Account/list"
+    },
+    {
+      "t": 1793718676376,
+      "url": "https://example.lightning.force.com/lightning/o/Account/list"
+    },
+    {
+      "t": 1793718678204,
+      "url": "https://example.lightning.force.com/lightning/o/Account/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=17937186780194033"
+    },
+    {
+      "t": 1793718692655,
+      "url": "https://example.lightning.force.com/lightning/r/Account/001fj00002AW4zQAAT/view"
+    }
+  ]
+}

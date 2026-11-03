@@ -1,0 +1,467 @@
+{
+  "baseUrl": "https://example.lightning.force.com",
+  "startedAt": "2026-11-03T15:21:40.440Z",
+  "actions": [
+    {
+      "name": "openPage",
+      "url": "about:blank",
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53"
+    },
+    {
+      "name": "navigate",
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/list",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=navigation[name=\"Global Header\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53"
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"New\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "New"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=spinbutton[name=\"Amount\"i]",
+      "text": "",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Cancel\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "spinbutton",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Amount"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Opportunity Name\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Opportunity Name"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Opportunity Name\"i]",
+      "text": "Regress Recorded Deal",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=tab[name=\"* New Opportunity\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Opportunity Name"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=combobox[name=\"Account Name\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "combobox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Account Name"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=combobox[name=\"Account Name\"i]",
+      "text": "Regress Lookup",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=option[name=\"Search Show more results for\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "combobox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Account Name"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "[id=\"1002:0\"]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Undo Account Name\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "default",
+        "body": "[id=\"1002:0\"]",
+        "options": {}
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=textbox[name=\"Close Date\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Close Date"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=textbox[name=\"Close Date\"i]",
+      "text": "12/31/2026",
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Undo Close Date\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "textbox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Close Date"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=combobox[name=\"Stage\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=listbox[name=\"Stage\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "combobox",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Stage"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "[id=\"1002:0\"]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "default",
+        "body": "[id=\"1002:0\"]",
+        "options": {}
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=spinbutton[name=\"Amount\"i]",
+      "text": "",
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "spinbutton",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Amount"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=spinbutton[name=\"Amount\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "spinbutton",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Amount"
+        }
+      }
+    },
+    {
+      "name": "fill",
+      "selector": "internal:role=spinbutton[name=\"Amount\"i]",
+      "text": "25000",
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "spinbutton",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Amount"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=button[name=\"Save\"s]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [
+        {
+          "name": "expect",
+          "selector": "internal:role=button[name=\"Add favorite\"i]"
+        }
+      ],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "button",
+        "options": {
+          "attrs": [],
+          "exact": true,
+          "name": "Save"
+        }
+      }
+    },
+    {
+      "name": "click",
+      "selector": "internal:role=tab[name=\"Details\"i]",
+      "button": "left",
+      "modifiers": 0,
+      "clickCount": 1,
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53",
+      "locator": {
+        "kind": "role",
+        "body": "tab",
+        "options": {
+          "attrs": [],
+          "exact": false,
+          "name": "Details"
+        }
+      }
+    },
+    {
+      "name": "closePage",
+      "signals": [],
+      "pageGuid": "page@5955a2f09f4a037d0c02c35c47125e53"
+    }
+  ],
+  "events": [
+    {
+      "t": 1793719304814,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/list",
+      "role": "button",
+      "name": "New",
+      "value": null,
+      "ids": ["brandBand_2", "593:0", "422:0", "474:0"],
+      "field": null,
+      "dialog": null
+    },
+    {
+      "t": 1793719309201,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["input-233", "sectionContent-210", "brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": "Opportunity Name",
+      "dialog": null
+    },
+    {
+      "t": 1793719311888,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "combobox",
+      "name": "Account Name",
+      "value": "",
+      "ids": ["combobox-input-314", "sectionContent-210", "brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": "Account Name",
+      "dialog": null
+    },
+    {
+      "t": 1793719315873,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "option",
+      "name": "Regress Lookup Target",
+      "value": "001fj00002AZ7sbAAD",
+      "ids": [
+        "combobox-input-314-1-314",
+        "dropdown-element-314",
+        "sectionContent-210",
+        "brandBand_3",
+        "1152:0",
+        "1002:0",
+        "1054:0"
+      ],
+      "field": "Account Name",
+      "dialog": null
+    },
+    {
+      "t": 1793719317166,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "textbox",
+      "name": "",
+      "value": null,
+      "ids": ["input-226", "sectionContent-210", "brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": "Close Date",
+      "dialog": null
+    },
+    {
+      "t": 1793719319456,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "combobox",
+      "name": "Stage",
+      "value": "--None--",
+      "ids": ["combobox-button-247", "sectionContent-210", "brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": "Stage",
+      "dialog": null
+    },
+    {
+      "t": 1793719320738,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "option",
+      "name": "Qualification",
+      "value": "Qualification",
+      "ids": [
+        "combobox-button-247-2-247",
+        "dropdown-element-247",
+        "sectionContent-210",
+        "brandBand_3",
+        "1152:0",
+        "1002:0",
+        "1054:0"
+      ],
+      "field": "Stage",
+      "dialog": null
+    },
+    {
+      "t": 1793719322027,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "spinbutton",
+      "name": "",
+      "value": null,
+      "ids": ["input-218", "sectionContent-210", "brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": "Amount",
+      "dialog": null
+    },
+    {
+      "t": 1793719324173,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559",
+      "role": "button",
+      "name": "Save",
+      "value": null,
+      "ids": ["brandBand_3", "1152:0", "1002:0", "1054:0"],
+      "field": null,
+      "dialog": null
+    },
+    {
+      "t": 1793719328449,
+      "url": "https://example.lightning.force.com/lightning/r/Opportunity/006fj00000PBxw1AAD/view",
+      "role": "tab",
+      "name": "Details",
+      "value": null,
+      "ids": ["detailTab__item", "brandBand_4", "1152:0", "1002:0", "1054:0"],
+      "field": null,
+      "dialog": null
+    }
+  ],
+  "navigations": [
+    {
+      "t": 1793719301106,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/list"
+    },
+    {
+      "t": 1793719301730,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/list"
+    },
+    {
+      "t": 1793719304849,
+      "url": "https://example.lightning.force.com/lightning/o/Opportunity/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=179371930482928559"
+    },
+    {
+      "t": 1793719324897,
+      "url": "https://example.lightning.force.com/lightning/r/Opportunity/006fj00000PBxw1AAD/view"
+    }
+  ]
+}

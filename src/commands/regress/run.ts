@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { Flags, SfCommand, StandardColors } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import {
@@ -9,12 +10,13 @@ import {
   loadTestFile,
   runTests,
   TestFileError,
+  toJUnitXml,
   type RunEvent,
   type RunSummary,
-  type StepResult,
   type TestDefinition,
-  type TestResult,
 } from '../../engine/index.js';
+import { browserFor } from '../../cli/org-browser.js';
+import { displayPath, formatTestResult } from '../../cli/output.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('sf-regress', 'regress.run');
@@ -48,13 +50,26 @@ export default class RegressRun extends SfCommand<RegressRunResult> {
       summary: messages.getMessage('flags.allow-production.summary'),
       default: false,
     }),
+    headed: Flags.boolean({
+      summary: messages.getMessage('flags.headed.summary'),
+      default: false,
+    }),
+    'results-dir': Flags.directory({
+      summary: messages.getMessage('flags.results-dir.summary'),
+      default: 'regress-results',
+    }),
+    junit: Flags.file({
+      summary: messages.getMessage('flags.junit.summary'),
+    }),
   };
 
   public async run(): Promise<RegressRunResult> {
     const { flags } = await this.parse(RegressRun);
 
     const tests = await this.loadTests(flags.test, flags['tests-dir'], flags.suite);
-    const client = connectionClient(flags['target-org'].getConnection(flags['api-version']));
+    const targetOrg = flags['target-org'];
+    const conn = targetOrg.getConnection(flags['api-version']);
+    const client = connectionClient(conn);
 
     const org = await client.getOrgInfo();
     this.log(
@@ -73,8 +88,17 @@ export default class RegressRun extends SfCommand<RegressRunResult> {
 
     const summary = await runTests(tests, client, {
       allowProduction: flags['allow-production'],
+      resultsDir: flags['results-dir'],
       onEvent: (event) => this.print(event),
+      // Opened only if a test has browser steps. Logs in with the CLI's existing session.
+      browser: browserFor(targetOrg, conn, !flags.headed),
     });
+
+    if (flags.junit) {
+      await mkdir(dirname(flags.junit), { recursive: true });
+      await writeFile(flags.junit, toJUnitXml(summary));
+      this.log(`JUnit report: ${flags.junit}`);
+    }
 
     const seconds = (summary.durationMs / 1000).toFixed(1);
     const parts = [StandardColors.success(`${summary.passed} passed`)];
@@ -121,39 +145,6 @@ export default class RegressRun extends SfCommand<RegressRunResult> {
   }
 
   private print(event: RunEvent): void {
-    if (event.type !== 'test:end') return;
-    const { result } = event;
-    const mark = result.status === 'passed' ? StandardColors.success('✔') : StandardColors.error('✘');
-    const file = result.file ? `  ${result.file}` : '';
-    this.log(`${mark} ${result.name}  (${(result.durationMs / 1000).toFixed(1)}s)${file}`);
-    if (result.error) this.log(`    ${StandardColors.error(result.error)}`);
-    for (const step of result.steps) this.log(`    ${formatStep(step)}`);
-    this.log(`    ${formatCleanup(result)}`);
-    this.log('');
+    if (event.type === 'test:end') formatTestResult(event.result).forEach((line) => this.log(line));
   }
-}
-
-/** Show paths relative to the current folder when they're inside it, absolute otherwise. */
-function displayPath(path: string): string {
-  const rel = relative(process.cwd(), path);
-  return rel && !rel.startsWith('..') && !isAbsolute(rel) ? rel : resolve(path);
-}
-
-function formatStep(step: StepResult): string {
-  const title = `${step.index}. ${step.name ? `${step.name} (${step.type})` : step.type}`;
-  if (step.status === 'skipped') return `-  ${title}  skipped`;
-  if (step.status === 'failed') {
-    const where = step.line ? ` [line ${step.line}]` : '';
-    return `${StandardColors.error('✘')}  ${title}${where}\n       ${StandardColors.error(step.error ?? 'failed')}`;
-  }
-  return `${StandardColors.success('✔')}  ${title}${step.detail ? `  ${step.detail}` : ''}`;
-}
-
-function formatCleanup(result: TestResult): string {
-  const { deleted, errors } = result.cleanup;
-  if (deleted.length === 0 && errors.length === 0) return 'cleanup: nothing to delete';
-  const text = `cleanup: deleted ${deleted.length} record${deleted.length === 1 ? '' : 's'}`;
-  if (errors.length === 0) return text;
-  const failures = errors.map((e) => `\n       could not delete ${e.sobject} ${e.id}: ${e.error}`).join('');
-  return StandardColors.warning(`${text}, ${errors.length} failed${failures}`);
 }

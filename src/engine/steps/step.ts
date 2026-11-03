@@ -1,6 +1,7 @@
+import type { Page } from 'playwright';
 import type { z } from 'zod';
 import type { CleanupTracker } from '../cleanup.js';
-import type { OrgClient } from '../types.js';
+import type { OrgClient, OrgInfo } from '../types.js';
 import type { Variables } from '../variables.js';
 
 export type StepContext = {
@@ -9,6 +10,11 @@ export type StepContext = {
   cleanup: CleanupTracker;
   /** The step's arguments before variable resolution, for readable error messages. */
   raw: Record<string, unknown>;
+  org: OrgInfo;
+  /** When the test started; used to tell records the test created from existing ones. */
+  startedAt: Date;
+  /** The test's browser page, opened (and logged in) on first use. */
+  browser(): Promise<{ page: Page; baseUrl: string }>;
 };
 
 export type StepOutput = {
@@ -49,6 +55,13 @@ export function show(value: unknown): string {
   if (value === undefined) return 'undefined';
   if (typeof value === 'string') return JSON.stringify(value);
   return JSON.stringify(value) ?? typeof value;
+}
+
+/** A value as plain text for typing into the UI: null/undefined become "". */
+export function asText(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return (value as number).toString();
 }
 
 /** Label for the left side of an assertion: the original $expression if there was one. */

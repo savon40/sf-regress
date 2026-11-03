@@ -2,6 +2,21 @@
 
 Regression testing for Salesforce orgs, as a Salesforce CLI plugin. Tests are YAML files in your repo; `sf regress run` replays them against an org and deletes every record it created.
 
+## Record
+
+```bash
+sf regress record "New account with a contact" --target-org my-sandbox
+```
+
+A browser opens, logged in to the org with Playwright's recorder toolbar. Click through the test, use the toolbar's assert tools to add checks, then close the browser. sf-regress turns the recording into readable YAML in `tests/`:
+
+- Lightning selectors become field labels and button names (`{ field: Industry }`, `{ button: Save, in: New Contact }`); generated ids like `[id="1194:0"]` are repaired
+- picklist and lookup choices become `browser.select` steps
+- typed names become `params` with a `$run.id` suffix, so reruns don't collide
+- records you created become variables that are deleted after every run
+
+Records created while recording are deleted afterwards (`--keep-records` to keep them), and the new test is replayed once to check it works (`--no-verify` to skip).
+
 ## Run
 
 ```bash
@@ -9,7 +24,11 @@ sf regress run --target-org my-sandbox                    # every test under ./t
 sf regress run --suite smoke --target-org my-sandbox      # tests tagged "smoke"
 sf regress run --test tests/large-opp.yaml -o my-sandbox  # one file (repeatable)
 sf regress run -o my-sandbox --json                       # machine-readable, exit code 1 on failure
+sf regress run -o my-sandbox --junit regress-results/junit.xml   # JUnit report for CI
+sf regress run -o my-sandbox --headed                     # watch the browser steps
 ```
+
+Browser steps log in with the CLI's existing session (`/secur/frontdoor.jsp`); no passwords are stored. When a step fails with a browser open, a screenshot is saved to `regress-results/`.
 
 Production orgs are refused unless you pass `--allow-production` or the test sets `allowProduction: true`.
 
@@ -50,10 +69,30 @@ steps:
 | `assert.contains`  | `actual`, `expected`, `message?` | Substring of a string, or item in a list.                                |
 | `assert.exists`    | `actual`, `message?`             | Not null/empty. Shorthand: `assert.exists: $x.Id`                        |
 
+### Browser steps
+
+Elements are named the way a person would describe them. A target is one of `button`, `link`, `tab`, `field`, `text`, `option`, `menuitem`, `checkbox`, `heading` or `selector` (raw Playwright selector, last resort), plus optional `in: <dialog or console tab title>`, `exact: false` (substring match) and `timeout` (ms).
+
+| Step                    | Example                                            | Notes                                                                                          |
+| ----------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `browser.goto`          | `browser.goto: /lightning/r/Account/$acct.Id/view` | Paths are relative to the org.                                                                 |
+| `browser.click`         | `{ button: Save, in: New Contact }`                |                                                                                                |
+| `browser.fill`          | `{ field: Account Name, value: $accountName }`     | `field` is the label (or API name); a required `*` is ignored.                                 |
+| `browser.select`        | `{ field: Industry, value: Banking }`              | Picklists, lookups (types, then picks the record) and native selects.                          |
+| `browser.press`         | `browser.press: Enter`                             |                                                                                                |
+| `browser.expectVisible` | `{ text: "was created" }`                          |                                                                                                |
+| `browser.expectHidden`  | `{ button: Delete }`                               | Waits for it to disappear.                                                                     |
+| `browser.expectValue`   | `{ field: Stage, value: Prospecting }`             | Inputs, picklists, and read-only fields on record pages.                                       |
+| `browser.expectText`    | `{ field: Amount, contains: "60,000" }`            | Case-insensitive substring.                                                                    |
+| `browser.captureRecord` | `browser.captureRecord: acct`                      | Reads the record from the URL into `$acct`; deletes it after the test if this test created it. |
+
+Lightning keeps hidden copies of earlier pages in the DOM, so targets always resolve to visible elements. Fields on a record page may be on a tab that isn't open (e.g. Details); the error message lists the unselected tabs.
+
 ### Values
 
 - `$name.path` reads a variable: `$acme.Id`, `$result.records.0.Account.Name`. Use `.0` for list indexes (`[0]` breaks inside `{ ... }` unless quoted). `$$` is a literal `$`.
 - `today`, `+30d`, `-7d`, `+2w`, `+1m`, `+1y` become dates (`YYYY-MM-DD`).
+- Built-ins: `$run.id` (unique per run), `$run.date`, `$run.startedAt` (SOQL datetime), `$run.userId`.
 - Records are deleted newest-first when the test ends, pass or fail.
 
 ## Develop

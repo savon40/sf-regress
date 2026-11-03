@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "types": ["mocha", "node"]
+    "types": ["mocha", "node"],
+    "lib": ["ES2023", "DOM"]
   },
   "include": ["./src/**/*.ts"]
 }

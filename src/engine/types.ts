@@ -4,6 +4,8 @@
  * the sf CLI, by ForceClaw, or by a mock in unit tests.
  */
 
+import type { Page } from 'playwright';
+
 export type SfRecord = Record<string, unknown> & {
   attributes?: { type: string; url?: string };
 };
@@ -21,7 +23,20 @@ export type OrgInfo = {
   isSandbox: boolean;
   trialExpirationDate: string | null;
   username?: string;
+  /** Id of the running user; used to tell which records a test created. */
+  userId?: string;
   instanceUrl?: string;
+};
+
+/**
+ * A logged-in browser for browser.* steps. The engine only uses Playwright pages;
+ * how the session logs in (frontdoor, saved state, ...) is up to the caller.
+ */
+export type BrowserSession = {
+  /** Origin that relative paths like /lightning/o/Account/home resolve against. */
+  baseUrl: string;
+  newPage(): Promise<Page>;
+  close(): Promise<void>;
 };
 
 export type OrgClient = {
@@ -31,6 +46,8 @@ export type OrgClient = {
   delete(sobject: string, id: string): Promise<void>;
   query(soql: string): Promise<QueryResult>;
   getOrgInfo(): Promise<OrgInfo>;
+  /** Object API names and labels (optional; used when post-processing recordings). */
+  describeObjects?(): Promise<Array<{ name: string; label: string }>>;
 };
 
 /** A test after YAML parsing and validation, before any variables are resolved. */
@@ -68,6 +85,8 @@ export type StepResult = {
   /** Short summary of what the step did, e.g. "Account 001xx... -> $acme". */
   detail?: string;
   error?: string;
+  /** Screenshot saved when the step failed with a browser open. */
+  screenshot?: string;
 };
 
 export type CleanupResult = {

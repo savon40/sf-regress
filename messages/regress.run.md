@@ -38,6 +38,18 @@ Folder to look for tests in when --test isn't given.
 
 Allow running against a production org.
 
+# flags.headed.summary
+
+Show the browser window while browser steps run.
+
+# flags.results-dir.summary
+
+Folder for screenshots of failed steps.
+
+# flags.junit.summary
+
+Write a JUnit XML report to this file, for CI systems.
+
 # error.noTestsDir
 
 Tests folder "%s" doesn't exist. Create it, pass --tests-dir, or name files with --test.

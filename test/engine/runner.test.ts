@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { parseTest } from '../../src/engine/loader.js';
-import { isProduction, runTests, type RunEvent } from '../../src/engine/runner.js';
+import { isProduction, message, runTests, slug, type RunEvent } from '../../src/engine/runner.js';
 import { DEV_ORG, MockOrg, PROD_ORG } from './mock-org.js';
 
 const EXAMPLE = `
@@ -97,6 +97,19 @@ steps:
     const events: Array<RunEvent['type']> = [];
     await runTests([parseTest(EXAMPLE)], new MockOrg(), { ...options, onEvent: (e) => events.push(e.type) });
     expect(events).to.deep.equal(['test:start', 'step:end', 'step:end', 'step:end', 'step:end', 'test:end']);
+  });
+
+  it('condenses Playwright errors to the first line and the last reason', () => {
+    const raw =
+      'locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole(option)\u001b[22m\n' +
+      '  - locator resolved to <div role="option">\n  58 × waiting for element to be visible\n     - element is not visible\n';
+    expect(message(new Error(raw))).to.equal('locator.click: Timeout 30000ms exceeded. (element is not visible)');
+    expect(message(new Error('plain'))).to.equal('plain');
+  });
+
+  it('makes file-safe slugs from test names', () => {
+    expect(slug('Large opp routes to Finance!')).to.equal('large-opp-routes-to-finance');
+    expect(slug('***')).to.equal('test');
   });
 
   describe('production safety', () => {

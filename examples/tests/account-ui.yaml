@@ -1,0 +1,24 @@
+name: Create an account through the UI
+description: Fills in the New Account form, saves, and checks the record through the UI and the API.
+tags: [account, ui]
+params:
+  accountName: 'Regress UI $run.id'
+steps:
+  - browser.goto: /lightning/o/Account/new
+  - browser.fill: { field: Account Name, value: $accountName }
+  - browser.select: { field: Industry, value: Banking }
+  - browser.select: { field: Rating, value: Hot }
+  - browser.click: { button: Save, in: New Account }
+
+  - name: Remember the new account (and delete it afterwards)
+    browser.captureRecord: acct
+
+  - browser.expectValue: { field: Industry, value: Banking }
+  - browser.click: { tab: Details }
+  - browser.expectValue: { field: Rating, value: Hot }
+
+  - api.query:
+      soql: "SELECT Name, Industry, Rating FROM Account WHERE Id = '$acct.Id'"
+      as: saved
+  - assert.equals: { actual: $saved.records.0.Name, expected: $accountName }
+  - assert.equals: { actual: $saved.records.0.Industry, expected: Banking }

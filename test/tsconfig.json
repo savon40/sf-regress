@@ -3,6 +3,7 @@
   "include": ["./**/*.ts"],
   "compilerOptions": {
     "skipLibCheck": true,
-    "types": ["mocha", "node"]
+    "types": ["mocha", "node"],
+    "lib": ["ES2023", "DOM"]
   }
 }

@@ -1,0 +1,24 @@
+name: Opportunity record page shows API-created data
+tags: [opportunity, ui]
+steps:
+  - api.create:
+      sobject: Account
+      as: acme
+      fields: { Name: 'Regress Acme $run.id' }
+  - api.create:
+      sobject: Opportunity
+      as: opp
+      fields:
+        { Name: 'Regress UI Opp $run.id', AccountId: $acme.Id, Amount: 60000, StageName: Prospecting, CloseDate: +30d }
+
+  - browser.goto: /lightning/r/Opportunity/$opp.Id/view
+  - browser.expectVisible: { text: 'Regress UI Opp $run.id' }
+
+  # Header fields
+  - browser.expectText: { field: Account Name, contains: 'Regress Acme $run.id' }
+  - browser.expectText: { field: Amount, contains: '60,000' }
+
+  # Details tab
+  - browser.click: { tab: Details }
+  - browser.expectValue: { field: Stage, value: Prospecting }
+  - browser.expectValue: { field: Opportunity Name, value: 'Regress UI Opp $run.id' }
