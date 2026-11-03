@@ -1,0 +1,28 @@
+name: Account can be updated and deleted
+tags: [account, smoke]
+steps:
+  - api.create:
+      sobject: Account
+      as: acct
+      fields: { Name: 'Regress Lifecycle $run.id', Industry: Technology }
+
+  - api.update:
+      sobject: Account
+      id: $acct.Id
+      fields: { Industry: Banking, Description: 'Updated by sf-regress' }
+
+  - api.query:
+      soql: "SELECT Name, Industry, Description, CreatedDate FROM Account WHERE Id = '$acct.Id'"
+      as: saved
+
+  - assert.equals: { actual: $saved.records.0.Industry, expected: Banking }
+  - assert.notEquals: { actual: $saved.records.0.Industry, expected: Technology }
+  - assert.contains: { actual: $saved.records.0.Name, expected: Regress Lifecycle }
+  - assert.exists: $saved.records.0.CreatedDate
+
+  - api.delete: { sobject: Account, id: $acct.Id }
+
+  - api.query:
+      soql: "SELECT Id FROM Account WHERE Id = '$acct.Id'"
+      as: gone
+  - assert.equals: { actual: $gone.totalSize, expected: 0 }

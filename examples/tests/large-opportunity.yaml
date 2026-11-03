@@ -1,0 +1,31 @@
+name: Large opportunity starts in Prospecting
+description: Creates an account and a large opportunity, then checks the stage and amount saved correctly.
+tags: [opportunity, smoke]
+params:
+  accountName: 'Regress Acme $run.id'
+steps:
+  - name: Create the account
+    api.create:
+      sobject: Account
+      as: acme
+      fields: { Name: $accountName }
+
+  - name: Create a large opportunity
+    api.create:
+      sobject: Opportunity
+      as: opp
+      fields:
+        Name: 'Regress Big Opp $run.id'
+        AccountId: $acme.Id
+        Amount: 60000
+        StageName: Prospecting
+        CloseDate: +30d
+
+  - api.query:
+      soql: "SELECT StageName, Amount, CloseDate, Account.Name FROM Opportunity WHERE Id = '$opp.Id'"
+      as: result
+
+  - assert.equals: { actual: $result.totalSize, expected: 1 }
+  - assert.equals: { actual: $result.records.0.StageName, expected: Prospecting }
+  - assert.equals: { actual: $result.records.0.Amount, expected: 60000 }
+  - assert.equals: { actual: $result.records.0.Account.Name, expected: $accountName }

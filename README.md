@@ -1,145 +1,68 @@
 # sf-regress
 
-[![NPM](https://img.shields.io/npm/v/sf-regress.svg?label=sf-regress)](https://www.npmjs.com/package/sf-regress) [![Downloads/week](https://img.shields.io/npm/dw/sf-regress.svg)](https://npmjs.org/package/sf-regress) [![License](https://img.shields.io/badge/License-BSD%203--Clause-brightgreen.svg)](https://raw.githubusercontent.com/salesforcecli/sf-regress/main/LICENSE.txt)
+Regression testing for Salesforce orgs, as a Salesforce CLI plugin. Tests are YAML files in your repo; `sf regress run` replays them against an org and deletes every record it created.
 
-## Using the template
-
-This repository provides a template for creating a plugin for the Salesforce CLI. To convert this template to a working plugin:
-
-1. Please get in touch with the Platform CLI team. We want to help you develop your plugin.
-2. Generate your plugin:
-
-   ```
-   sf plugins install dev
-   sf dev generate plugin
-
-   git init -b main
-   git add . && git commit -m "chore: initial commit"
-   ```
-
-3. Create your plugin's repo in the salesforcecli github org
-4. When you're ready, replace the contents of this README with the information you want.
-
-## Learn about `sf` plugins
-
-Salesforce CLI plugins are based on the [oclif plugin framework](<(https://oclif.io/docs/introduction.html)>). Read the [plugin developer guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_plugins.meta/sfdx_cli_plugins/cli_plugins_architecture_sf_cli.htm) to learn about Salesforce CLI plugin development.
-
-This repository contains a lot of additional scripts and tools to help with general Salesforce node development and enforce coding standards. You should familiarize yourself with some of the [node developer packages](#tooling) used by Salesforce.
-
-Additionally, there are some additional tests that the Salesforce CLI will enforce if this plugin is ever bundled with the CLI. These test are included by default under the `posttest` script and it is required to keep these tests active in your plugin if you plan to have it bundled.
-
-### Tooling
-
-- [@salesforce/core](https://github.com/forcedotcom/sfdx-core)
-- [@salesforce/kit](https://github.com/forcedotcom/kit)
-- [@salesforce/sf-plugins-core](https://github.com/salesforcecli/sf-plugins-core)
-- [@salesforce/ts-types](https://github.com/forcedotcom/ts-types)
-- [@salesforce/ts-sinon](https://github.com/forcedotcom/ts-sinon)
-- [@salesforce/dev-config](https://github.com/forcedotcom/dev-config)
-- [@salesforce/dev-scripts](https://github.com/forcedotcom/dev-scripts)
-
-### Hooks
-
-For cross clouds commands, e.g. `sf env list`, we utilize [oclif hooks](https://oclif.io/docs/hooks) to get the relevant information from installed plugins.
-
-This plugin includes sample hooks in the [src/hooks directory](src/hooks). You'll just need to add the appropriate logic. You can also delete any of the hooks if they aren't required for your plugin.
-
-# Everything past here is only a suggestion as to what should be in your specific plugin's description
-
-This plugin is bundled with the [Salesforce CLI](https://developer.salesforce.com/tools/sfdxcli). For more information on the CLI, read the [getting started guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm).
-
-We always recommend using the latest version of these commands bundled with the CLI, however, you can install a specific version or tag if needed.
-
-## Install
+## Run
 
 ```bash
-sf plugins install sf-regress@x.y.z
+sf regress run --target-org my-sandbox                    # every test under ./tests
+sf regress run --suite smoke --target-org my-sandbox      # tests tagged "smoke"
+sf regress run --test tests/large-opp.yaml -o my-sandbox  # one file (repeatable)
+sf regress run -o my-sandbox --json                       # machine-readable, exit code 1 on failure
 ```
 
-## Issues
+Production orgs are refused unless you pass `--allow-production` or the test sets `allowProduction: true`.
 
-Please report any issues at https://github.com/forcedotcom/cli/issues
+## Test format
 
-## Contributing
+```yaml
+name: Large opportunity starts in Prospecting
+tags: [opportunity, smoke]
+params:
+  accountName: 'Regress Acme $run.id' # $run.id is unique per run
+steps:
+  - name: Create the account # optional step name
+    api.create:
+      sobject: Account
+      as: acme
+      fields: { Name: $accountName }
+  - api.create:
+      sobject: Opportunity
+      as: opp
+      fields: { Name: 'Big Opp', AccountId: $acme.Id, Amount: 60000, StageName: Prospecting, CloseDate: +30d }
+  - api.query:
+      soql: "SELECT StageName FROM Opportunity WHERE Id = '$opp.Id'"
+      as: result
+  - assert.equals: { actual: $result.records.0.StageName, expected: Prospecting }
+```
 
-1. Please read our [Code of Conduct](CODE_OF_CONDUCT.md)
-2. Create a new issue before starting your project so that we can keep track of
-   what you are trying to add/fix. That way, we can also offer suggestions or
-   let you know if there is already an effort in progress.
-3. Fork this repository.
-4. [Build the plugin locally](#build)
-5. Create a _topic_ branch in your fork. Note, this step is recommended but technically not required if contributing using a fork.
-6. Edit the code in your fork.
-7. Write appropriate tests for your changes. Try to achieve at least 95% code coverage on any new code. No pull request will be accepted without unit tests.
-8. Sign CLA (see [CLA](#cla) below).
-9. Send us a pull request when you are done. We'll review your code, suggest any needed changes, and merge it in.
+### Steps
 
-### CLA
+| Step               | Arguments                        | Notes                                                                    |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------------ |
+| `api.create`       | `sobject`, `fields`, `as`        | Result is the fields plus `Id`. Deleted after the test.                  |
+| `api.update`       | `sobject`, `id`, `fields`        |                                                                          |
+| `api.delete`       | `sobject`, `id`                  |                                                                          |
+| `api.query`        | `soql`, `as`                     | Result is `{ totalSize, records }`. Shorthand: `api.query: "SELECT ..."` |
+| `api.track`        | `soql`, `sobject?`, `as`         | Registers matching records for cleanup. Query must select `Id`.          |
+| `assert.equals`    | `actual`, `expected`, `message?` | `60000` and `"60000"` count as equal.                                    |
+| `assert.notEquals` | `actual`, `expected`, `message?` |                                                                          |
+| `assert.contains`  | `actual`, `expected`, `message?` | Substring of a string, or item in a list.                                |
+| `assert.exists`    | `actual`, `message?`             | Not null/empty. Shorthand: `assert.exists: $x.Id`                        |
 
-External contributors will be required to sign a Contributor's License
-Agreement. You can do so by going to https://cla.salesforce.com/sign-cla.
+### Values
 
-### Build
+- `$name.path` reads a variable: `$acme.Id`, `$result.records.0.Account.Name`. Use `.0` for list indexes (`[0]` breaks inside `{ ... }` unless quoted). `$$` is a literal `$`.
+- `today`, `+30d`, `-7d`, `+2w`, `+1m`, `+1y` become dates (`YYYY-MM-DD`).
+- Records are deleted newest-first when the test ends, pass or fail.
 
-To build the plugin locally, make sure to have yarn installed and run the following commands:
+## Develop
 
 ```bash
-# Clone the repository
-git clone git@github.com:salesforcecli/sf-regress
-
-# Install the dependencies and compile
-yarn && yarn build
+yarn install
+yarn build
+yarn test                                         # unit tests + lint
+./bin/dev.js regress run -o <alias> -d examples/tests
 ```
 
-To use your plugin, run using the local `./bin/dev` or `./bin/dev.cmd` file.
-
-```bash
-# Run using local run file.
-./bin/dev hello world
-```
-
-There should be no differences when running via the Salesforce CLI or using the local run file. However, it can be useful to link the plugin to do some additional testing or run your commands from anywhere on your machine.
-
-```bash
-# Link your plugin to the sf cli
-sf plugins link .
-# To verify
-sf plugins
-```
-
-## Commands
-
-<!-- commands -->
-
-- [`sf hello world`](#sf-hello-world)
-
-## `sf hello world`
-
-Say hello either to the world or someone you know.
-
-```
-USAGE
-  $ sf hello world [--json] [-n <value>]
-
-FLAGS
-  -n, --name=<value>  [default: World] The name of the person you'd like to say hello to.
-
-GLOBAL FLAGS
-  --json  Format output as json.
-
-DESCRIPTION
-  Say hello either to the world or someone you know.
-
-  Say hello either to the world or someone you know.
-
-EXAMPLES
-  Say hello to the world:
-
-    $ sf hello world
-
-  Say hello to someone you know:
-
-    $ sf hello world --name Astro
-```
-
-<!-- commandsstop -->
+The engine (`src/engine/`) has no CLI dependencies; `src/commands/` holds thin oclif commands.

@@ -5,7 +5,9 @@
   "dependencies": {
     "@oclif/core": "^5",
     "@salesforce/core": "^9.3.6",
-    "@salesforce/sf-plugins-core": "^13.0.7"
+    "@salesforce/sf-plugins-core": "^13.0.7",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^6.0.6",
@@ -43,8 +45,8 @@
       "@oclif/plugin-help"
     ],
     "topics": {
-      "hello": {
-        "description": "Commands to say hello."
+      "regress": {
+        "description": "Run and manage Salesforce regression tests."
       }
     },
     "flexibleTaxonomy": true
