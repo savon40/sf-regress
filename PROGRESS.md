@@ -51,7 +51,7 @@ Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 
 Needs the user's own Anthropic API key.
 
-- [ ] Decide how the key is provided (env var, `sf config`, ...) - never stored by us
+- [x] API key: `--api-key` flag, then `ANTHROPIC_API_KEY` env var, then `.env` in the project folder (warns if `.env` isn't gitignored); never stored or logged (`src/cli/api-key.ts`)
 - [ ] `sf regress create "<plain English>"`
 - [ ] `sf regress convert` for `tests/drafts/` (.docx via `mammoth`, .md, .txt; one or many tests per file)
 - [ ] Org metadata context for the AI (objects, fields, record types, buttons, approval processes)

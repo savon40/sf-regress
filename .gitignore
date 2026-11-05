@@ -50,3 +50,6 @@ node_modules
 
 # sf-regress output
 regress-results/
+
+# local secrets (Anthropic key for create/convert)
+.env
