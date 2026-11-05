@@ -1,5 +1,6 @@
 import type { Connection } from '@salesforce/core';
 import type { OrgClient, OrgInfo, QueryResult, SfRecord } from './types.js';
+import type { GlobalObject, MetadataSource, RawDescribe, RawLayouts } from './author/org-context.js';
 
 type SaveResult = {
   success: boolean;
@@ -65,6 +66,25 @@ export function connectionClient(conn: Connection): OrgClient {
         userId,
         instanceUrl: conn.instanceUrl,
       };
+    },
+  };
+}
+
+/** MetadataSource backed by a Connection, for AI test authoring. Reads metadata only, never records. */
+export function connectionMetadata(conn: Connection): MetadataSource {
+  return {
+    async describeGlobal(): Promise<GlobalObject[]> {
+      const result = await call(() => conn.describeGlobal());
+      return result.sobjects;
+    },
+    async describeObject(sobject): Promise<RawDescribe> {
+      return call(async () => (await conn.describe(sobject)) as unknown as RawDescribe);
+    },
+    async describeLayouts(sobject): Promise<RawLayouts> {
+      return call(() => conn.request<RawLayouts>(`/sobjects/${encodeURIComponent(sobject)}/describe/layouts`));
+    },
+    async query(soql): Promise<QueryResult> {
+      return connectionClient(conn).query(soql);
     },
   };
 }

@@ -54,7 +54,7 @@ Needs the user's own Anthropic API key.
 - [x] API key: `--api-key` flag, then `ANTHROPIC_API_KEY` env var, then `.env` in the project folder (warns if `.env` isn't gitignored); never stored or logged (`src/cli/api-key.ts`)
 - [ ] `sf regress create "<plain English>"`
 - [ ] `sf regress convert` for `tests/drafts/` (.docx via `mammoth`, .md, .txt; one or many tests per file)
-- [ ] Org metadata context for the AI (objects, fields, record types, buttons, approval processes)
+- [x] Org metadata context for the AI: fields (required, read-only, picklist values, lookups), record types, buttons, quick actions, approval processes; objects picked from the text by name/label (`src/engine/author/org-context.ts`). ~4.5k tokens for 4 standard objects
 - [ ] Verification run against the org; fill in selectors and details
 - [ ] Ambiguities asked as questions, never guessed
 - [ ] Save to `tests/`, move sources to `tests/drafts/converted/`
