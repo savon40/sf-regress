@@ -15,7 +15,7 @@
     "@salesforce/cli-plugins-testkit": "^5.3.75",
     "@salesforce/dev-scripts": "^15",
     "eslint": "^10.12.0",
-    "eslint-plugin-sf-plugin": "^3.0.1",
+    "eslint-plugin-sf-plugin": "^3.0.4",
     "oclif": "^6.0.8",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
