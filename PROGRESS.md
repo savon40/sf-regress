@@ -46,15 +46,18 @@ Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 - [ ] Recorder uses Playwright's private `_showRecorder`; Playwright is pinned to 1.64.1 and upgrades need a re-check
 - [ ] Optional AI pass to suggest extra assertions after recording (CLAUDE.md, Recording section)
 - [ ] `sf regress import` for Playwright / UI Script Recorder files (later)
+- [ ] `create`: interactive question answering only covered by unit tests - try it in a real terminal
+- [ ] `create`: AI can request more objects, but objects named by a synonym ("deal") rely on the AI asking
+- [ ] Default model is `claude-opus-5-5` (~6 cents per simple test); `--model claude-sonnet-5-5` is about half the price - compare quality on a few tests
 
-## M3 - next
+## M3 - in progress
 
 Needs the user's own Anthropic API key.
 
 - [x] API key: `--api-key` flag, then `ANTHROPIC_API_KEY` env var, then `.env` in the project folder (warns if `.env` isn't gitignored); never stored or logged (`src/cli/api-key.ts`)
-- [ ] `sf regress create "<plain English>"`
+- [x] `sf regress create "<plain English>"` - verified live: API test, browser test, and an ambiguous request that returned questions
 - [ ] `sf regress convert` for `tests/drafts/` (.docx via `mammoth`, .md, .txt; one or many tests per file)
 - [x] Org metadata context for the AI: fields (required, read-only, picklist values, lookups), record types, buttons, quick actions, approval processes; objects picked from the text by name/label (`src/engine/author/org-context.ts`). ~4.5k tokens for 4 standard objects
-- [ ] Verification run against the org; fill in selectors and details
-- [ ] Ambiguities asked as questions, never guessed
+- [x] Verification run against the org; failed steps sent back to the AI (up to 3 fixes); `org_mismatch` when the org doesn't behave as described (never weakens assertions)
+- [x] Ambiguities asked as questions, never guessed (asked in the terminal, or printed with `--no-prompt` / `--json`)
 - [ ] Save to `tests/`, move sources to `tests/drafts/converted/`

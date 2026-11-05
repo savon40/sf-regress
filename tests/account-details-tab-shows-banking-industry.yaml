@@ -1,0 +1,18 @@
+# Created with "sf regress create" on 2026-11-05 from:
+#   Open a new account's record page and check the Details tab shows the account's industry as
+#   Banking
+# Review notes:
+#   - Assumes the Account page layout shows the Industry field on the Details tab.
+
+name: Account Details tab shows Banking industry
+tags: [account, ui]
+steps:
+  - name: Create a Banking account
+    api.create:
+      sobject: Account
+      as: acct
+      fields: { Name: 'Regress Bank $run.id', Industry: Banking }
+  - browser.goto: /lightning/r/Account/$acct.Id/view
+  - browser.click: { tab: Details }
+  - name: Industry shows Banking
+    browser.expectValue: { field: Industry, value: Banking }

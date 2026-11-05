@@ -1,0 +1,28 @@
+# Created with "sf regress create" on 2026-11-05 from:
+#   Creating an opportunity in Prospecting for 60000 sets the forecast category to Pipeline
+#   and the probability to 10
+# Review notes:
+#   - The opportunity is created without an Account because the description doesn't mention one and AccountId isn't required.
+#   - Forecast category is checked with ForecastCategoryName, the editable field whose label is "Forecast Category"; its value Pipeline is the same in both forecast category fields.
+#   - Probability and Forecast Category are left blank on create, so the test checks the defaults the org fills in from the Prospecting stage.
+
+name: Prospecting opportunity gets Pipeline forecast category and 10% probability
+tags: [opportunity, forecast]
+params:
+  amount: 60000
+steps:
+  - name: Create an opportunity in Prospecting
+    api.create:
+      sobject: Opportunity
+      as: opp
+      fields: { Name: 'Regress Prospecting Opp $run.id', Amount: $amount, StageName: Prospecting, CloseDate: '+30d' }
+  - api.query:
+      soql: "SELECT ForecastCategoryName, Probability FROM Opportunity WHERE Id = '$opp.Id'"
+      as: result
+  - assert.equals:
+      {
+        actual: $result.records.0.ForecastCategoryName,
+        expected: Pipeline,
+        message: Forecast category should be Pipeline,
+      }
+  - assert.equals: { actual: $result.records.0.Probability, expected: 10, message: Probability should be 10% }

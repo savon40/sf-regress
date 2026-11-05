@@ -110,6 +110,7 @@ steps:
   it('makes file-safe slugs from test names', () => {
     expect(slug('Large opp routes to Finance!')).to.equal('large-opp-routes-to-finance');
     expect(slug('***')).to.equal('test');
+    expect(slug('a'.repeat(59) + ' and more')).to.equal('a'.repeat(59));
   });
 
   describe('production safety', () => {
