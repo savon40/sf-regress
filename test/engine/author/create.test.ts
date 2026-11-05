@@ -44,6 +44,7 @@ function scriptedModel(replies: AuthorReply[]): AuthorModel & { sent: string[]; 
         usage: () => ({ inputTokens: 100, outputTokens: 50, cacheReadTokens: 10 }),
       };
     },
+    splitDraft: async () => ({ tests: [], usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0 } }),
   };
   return model;
 }

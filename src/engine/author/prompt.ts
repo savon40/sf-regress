@@ -120,3 +120,17 @@ export function firstMessage(options: {
   ];
   return parts.filter(Boolean).join('\n\n');
 }
+
+/** System prompt for splitting a draft document (Word, Markdown, text) into separate tests. */
+export const SPLIT_PROMPT = `You prepare regression test descriptions for Salesforce orgs.
+You are given a document someone wrote describing one or more tests (test cases, a test plan, user stories with acceptance criteria, or notes).
+Split it into separate tests. For each test give:
+- name: a short test name (under 70 characters) that says what is checked. Use the document's own test name or id if it has one.
+- description: everything needed to write that test, in plain English: the setup, the steps, the data values and the expected results.
+  Each description must stand on its own: copy in any shared setup, preconditions or data from elsewhere in the document that the test relies on.
+  Keep the document's details exactly (field names, values, users, expected outcomes). Don't add anything the document doesn't say, and don't drop anything it does.
+
+One test checks one scenario. Separate scenarios (for example "under 50k" and "over 50k") are separate tests.
+Leave out content that isn't a test (revision history, sign-off tables, general introductions) unless a test depends on it.
+If the document contains no tests, reply with an empty list.
+Reply with JSON only.`;

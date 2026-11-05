@@ -1,25 +1,21 @@
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { createInterface } from 'node:readline/promises';
 import { Args } from '@oclif/core';
 import { Flags, SfCommand, StandardColors } from '@salesforce/sf-plugins-core';
 import { Messages, SfError } from '@salesforce/core';
 import {
   anthropicModel,
-  AuthorApiError,
   authorTest,
-  connectionClient,
   connectionMetadata,
   DEFAULT_MODEL,
-  isProduction,
   slug,
   type AuthorResult,
   type AuthorStatus,
   type TokenUsage,
 } from '../../engine/index.js';
-import { MissingApiKeyError, resolveApiKey } from '../../cli/api-key.js';
-import { browserFor } from '../../cli/org-browser.js';
+import { AuthorCli } from '../../cli/author.js';
+import { withHeader } from '../../cli/header.js';
 import { displayPath, formatTestResult } from '../../cli/output.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -66,54 +62,37 @@ export default class RegressCreate extends SfCommand<RegressCreateResult> {
     }),
   };
 
+  private readonly author = new AuthorCli(this);
+
   public async run(): Promise<RegressCreateResult> {
     const { args, flags } = await this.parse(RegressCreate);
 
-    const apiKey = this.apiKey(flags['api-key']);
+    const apiKey = this.author.apiKey(flags['api-key']);
     if (flags.output && existsSync(flags.output) && !flags.force) {
       throw new SfError(messages.getMessage('error.exists', [flags.output]), 'FileExists');
     }
 
     const targetOrg = flags['target-org'];
     const conn = targetOrg.getConnection(flags['api-version']);
-    const client = connectionClient(conn);
-    if (flags.verify) {
-      const org = await client.getOrgInfo();
-      if (isProduction(org) && !flags['allow-production']) {
-        throw new SfError(messages.getMessage('error.production', [org.name]), 'ProductionOrg');
-      }
-    }
+    const verify = await this.author.verification(targetOrg, conn, flags);
+    const ask = this.author.asker(flags.prompt);
 
-    const interactive = flags.prompt && !this.jsonEnabled() && Boolean(process.stdin.isTTY);
     this.spinner.start('Starting');
-    let result;
-    try {
-      result = await authorTest({
-        request: args.description,
-        name: flags.name,
-        model: anthropicModel({ apiKey, model: flags.model }),
-        metadata: connectionMetadata(conn),
-        ask: interactive ? (questions): Promise<string[]> => this.ask(questions) : undefined,
-        verify: flags.verify
-          ? {
-              client,
-              options: {
-                allowProduction: flags['allow-production'],
-                browser: browserFor(targetOrg, conn, true),
-                resultsDir: 'regress-results',
-              },
-            }
-          : undefined,
-        onProgress: (message) => {
-          this.spinner.status = message;
-        },
-      });
-    } catch (error) {
-      if (error instanceof AuthorApiError) throw new SfError(error.message, 'AnthropicApiError');
-      throw error;
-    } finally {
-      this.spinner.stop();
-    }
+    const result = await this.author
+      .withApiErrors(() =>
+        authorTest({
+          request: args.description,
+          name: flags.name,
+          model: anthropicModel({ apiKey, model: flags.model }),
+          metadata: connectionMetadata(conn),
+          ask,
+          verify,
+          onProgress: (message) => {
+            this.spinner.status = message;
+          },
+        })
+      )
+      .finally(() => this.spinner.stop());
 
     const base = {
       status: result.status,
@@ -124,11 +103,9 @@ export default class RegressCreate extends SfCommand<RegressCreateResult> {
     };
 
     if (result.status === 'questions' || !result.yaml || !result.test) {
-      this.log('\nThe AI needs more detail before it can write this test:\n');
-      result.questions.forEach((q, i) => this.log(`  ${i + 1}. ${q}`));
-      this.log('');
+      this.author.logQuestions(result.questions);
       this.warn(messages.getMessage('error.questions'));
-      this.logUsage(result.model, result.usage);
+      this.author.logUsage(result.model, result.usage);
       process.exitCode = 1;
       return base;
     }
@@ -140,7 +117,15 @@ export default class RegressCreate extends SfCommand<RegressCreateResult> {
       throw new SfError(messages.getMessage('error.exists', [file]), 'FileExists');
     }
     await mkdir(dirname(file), { recursive: true });
-    await writeFile(file, withHeader(result.yaml, args.description, result.notes, result.status));
+    await writeFile(
+      file,
+      withHeader(result.yaml, {
+        origin: 'Created with "sf regress create"',
+        description: args.description,
+        notes: result.notes,
+        status: result.status,
+      })
+    );
 
     const verified = this.report(result, file);
     return { ...base, file, name, verified };
@@ -167,72 +152,7 @@ export default class RegressCreate extends SfCommand<RegressCreateResult> {
       process.exitCode = 1;
     }
 
-    this.logUsage(result.model, result.usage);
+    this.author.logUsage(result.model, result.usage);
     return result.verification ? result.status === 'created' : undefined;
   }
-
-  private apiKey(flag: string | undefined): string {
-    try {
-      const found = resolveApiKey(flag);
-      if (found.warning) this.warn(found.warning);
-      return found.key;
-    } catch (error) {
-      if (error instanceof MissingApiKeyError) throw new SfError(error.message, 'MissingApiKey');
-      throw error;
-    }
-  }
-
-  private async ask(questions: string[]): Promise<string[]> {
-    this.spinner.stop();
-    this.log('\nThe AI has some questions (press Enter to skip one):\n');
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const answers: string[] = [];
-    try {
-      for (const [i, question] of questions.entries()) {
-        // eslint-disable-next-line no-await-in-loop
-        answers.push(await rl.question(`${i + 1}. ${question}\n> `));
-      }
-    } finally {
-      rl.close();
-    }
-    this.log('');
-    this.spinner.start('Continuing');
-    return answers;
-  }
-
-  private logUsage(model: string, usage: TokenUsage): void {
-    const total = usage.inputTokens + usage.cacheReadTokens;
-    this.log(
-      StandardColors.info(
-        `${model}: ${total.toLocaleString()} input tokens (${usage.cacheReadTokens.toLocaleString()} cached), ${usage.outputTokens.toLocaleString()} output tokens`
-      )
-    );
-  }
-}
-
-function withHeader(yaml: string, description: string, notes: string[], status: AuthorStatus): string {
-  const lines = [
-    `# Created with "sf regress create" on ${new Date().toISOString().slice(0, 10)} from:`,
-    ...wrap(description, 90).map((line) => `#   ${line}`),
-  ];
-  if (status === 'org_mismatch')
-    lines.push('# NOTE: this test failed its first run - the org did not behave as described.');
-  if (status === 'unverified') lines.push('# NOTE: this test failed its first run and needs review.');
-  if (notes.length) lines.push('# Review notes:', ...notes.map((n) => `#   - ${n}`));
-  return `${lines.join('\n')}\n\n${yaml.trimEnd()}\n`;
-}
-
-function wrap(text: string, width: number): string[] {
-  const lines: string[] = [];
-  let line = '';
-  for (const word of text.trim().split(/\s+/)) {
-    if (line && line.length + word.length + 1 > width) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = line ? `${line} ${word}` : word;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
 }

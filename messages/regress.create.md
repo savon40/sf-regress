@@ -68,10 +68,6 @@ Allow the verification run against a production org.
 
 %s already exists. Pass --force to overwrite it, or --output to choose another file.
 
-# error.production
-
-Refusing to verify against production org %s: the check creates real records. Pass --allow-production to do it anyway, or --no-verify to skip the check.
-
 # error.questions
 
 The test needs more detail before it can be written. Add the answers to your description and run the command again.

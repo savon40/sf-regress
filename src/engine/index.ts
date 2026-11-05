@@ -29,5 +29,14 @@ export {
   type FieldContext,
 } from './author/org-context.js';
 export { authorTest, type AuthorOptions, type AuthorResult, type AuthorStatus } from './author/create.js';
-export type { AuthorModel, AuthorReply, AuthorSession, TokenUsage } from './author/model.js';
+export type { AuthorModel, AuthorReply, AuthorSession, DraftCase, TokenUsage } from './author/model.js';
+export {
+  addUsage,
+  DRAFT_EXTENSIONS,
+  findDrafts,
+  isDraftFile,
+  moveToConverted,
+  readDraft,
+  splitDraft,
+} from './author/convert.js';
 export { anthropicModel, AuthorApiError, DEFAULT_MODEL } from './author/anthropic.js';

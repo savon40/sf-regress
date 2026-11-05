@@ -1,0 +1,30 @@
+# Converted with "sf regress convert" from tests/drafts/account-and-contact-tests.md on 2026-11-05 from:
+#   Run as a sales rep. Use a new account called "Regress Draft Co". Steps: 1. Create the
+#   account "Regress Draft Co" with Type "Customer - Direct". 2. Check the account's Type is
+#   "Customer - Direct" and its Rating is blank.
+# Review notes:
+#   - Added Phone (555-0100), because an org validation rule requires Phone when Account Type is Customer - Direct.
+#   - The test format has no way to switch users, so it runs as whichever user the run is configured with. Configure that user to be a sales rep if the profile matters.
+#   - The account name gets $run.id appended so reruns don't collide.
+#   - The blank Rating is checked with expected: null.
+
+name: TC-01 New account gets the right type
+tags: [account]
+steps:
+  - name: Create the account as Customer - Direct
+    api.create:
+      sobject: Account
+      as: acct
+      fields: { Name: 'Regress Draft Co $run.id', Type: 'Customer - Direct', Phone: '555-0100' }
+  - api.query:
+      soql: "SELECT Type, Rating FROM Account WHERE Id = '$acct.Id'"
+      as: result
+  - name: Type is Customer - Direct
+    assert.equals:
+      {
+        actual: $result.records.0.Type,
+        expected: 'Customer - Direct',
+        message: 'Account Type should be Customer - Direct',
+      }
+  - name: Rating is blank
+    assert.equals: { actual: $result.records.0.Rating, expected: null, message: 'Account Rating should be blank' }

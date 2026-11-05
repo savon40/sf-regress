@@ -17,6 +17,26 @@ A browser opens, logged in to the org with Playwright's recorder toolbar. Click 
 
 Records created while recording are deleted afterwards (`--keep-records` to keep them), and the new test is replayed once to check it works (`--no-verify` to skip).
 
+## Write tests with AI
+
+Describe a test in plain English, or drop test documents into `tests/drafts/`:
+
+```sh
+sf regress create "Creating an opportunity over 50k in Prospecting sets the forecast category to Pipeline" -o my-sandbox
+sf regress convert -o my-sandbox                                   # every .docx, .md and .txt in tests/drafts/
+sf regress convert --file tests/drafts/opportunity-tests.docx -o my-sandbox
+```
+
+Claude writes the YAML using the org's metadata (fields, picklist values, record types, buttons, approval processes), runs it once against the org to check it works, and fixes failed steps. If something is ambiguous it asks you instead of guessing. A document can hold many tests; each is saved to `tests/`, and the document moves to `tests/drafts/converted/` once all its tests are saved. Each saved test starts with a comment holding the original description and anything a reviewer should check.
+
+This uses your own Anthropic API key. Put it in a `.env` file in your project (make sure `.env` is in `.gitignore`):
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+or set `ANTHROPIC_API_KEY` in the environment, or pass `--api-key`. The key is never stored or logged. Only metadata (names and settings, never record data) and your descriptions are sent to Anthropic. `sf regress run` never uses AI.
+
 ## Run
 
 ```bash
