@@ -5,7 +5,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",
     "@oclif/core": "^5",
-    "@salesforce/core": "^9.3.6",
+    "@salesforce/core": "^9.4.4",
     "@salesforce/sf-plugins-core": "^13.0.7",
     "mammoth": "^1.13.0",
     "playwright": "1.64.1",
