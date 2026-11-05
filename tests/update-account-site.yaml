@@ -1,0 +1,16 @@
+# Recorded with "sf regress record" on 2026-11-03.
+# Run it with: sf regress run --test tests/update-account-site.yaml --target-org <alias>
+
+name: Update account site
+tags: [recorded]
+params:
+  accountSite: test site
+steps:
+  - browser.goto: /lightning/page/home
+  - browser.goto: /lightning/o/Account/home
+  - browser.click: { link: United Oil & Gas Corp. }
+  - browser.click: { tab: Details }
+  - browser.click: { button: Edit Account Site }
+  - browser.fill: { field: Account Site, value: $accountSite }
+  - browser.click: { button: Save }
+  - browser.expectValue: { field: Account Site, value: $accountSite }

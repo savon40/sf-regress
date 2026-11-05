@@ -113,6 +113,7 @@ steps:
 ## Working rules for Claude
 
 - Work milestone by milestone; don't start the next one until the current one runs end to end against the dev org
+- Keep PROGRESS.md up to date: tick items off as they're done, and add gaps or follow-ups as they come up
 - Keep the engine free of CLI dependencies
 - Write unit tests for every step type
 - Prefer small, readable modules over clever abstractions
