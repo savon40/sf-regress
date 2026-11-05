@@ -51,6 +51,7 @@ Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 - [ ] AI authoring can't see org automation: the dev org's "Contact Set Default LastName" flow overwrites new contacts' last names, so a related-list check failed and the AI guessed at the cause. Add active record-triggered flows/triggers per object to the org context, and send visible page text with browser failures
 - [ ] `convert`: only tried live with Markdown; .docx is unit-tested with a small generated file - try a real Word test plan (tables, numbered lists)
 - [ ] `convert`: documents that say "run as <user/profile>" can't be honoured - the test format has no run-as; the AI notes it for review
+- [ ] Publishing: the plugin template's release/npm-publish workflows were removed (they need Salesforce's bot token). Add a release + npm publish workflow with our own npm account when ready
 - [ ] Default model is `claude-opus-5-5` (~6 cents per simple test); `--model claude-sonnet-5-5` is about half the price - compare quality on a few tests
 
 ## M3 - in progress
