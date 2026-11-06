@@ -3,13 +3,23 @@
 What's done, what's left, and known gaps. Milestones are defined in [CLAUDE.md](CLAUDE.md).
 Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 
-| Milestone                                          | Status      | Commit    |
-| -------------------------------------------------- | ----------- | --------- |
-| M1 - `sf regress run`: API steps, asserts, cleanup | Done        | `7887e0c` |
-| M2 - Browser steps, `sf regress record`, JUnit     | Done        | `b94eb46` |
-| M3 - `sf regress create` / `convert` (AI)          | Not started |           |
-| M4 - `sf regress generate` from org metadata       | Not started |           |
-| M5 - Self-healing failed steps                     | Not started |           |
+| Milestone                                          | Status                    | Commit    |
+| -------------------------------------------------- | ------------------------- | --------- |
+| M1 - `sf regress run`: API steps, asserts, cleanup | Done                      | `7887e0c` |
+| M2 - Browser steps, `sf regress record`, JUnit     | Done                      | `b94eb46` |
+| M3 - `sf regress create` / `convert` (AI)          | Built, 2 live checks left | `dcd58d2` |
+| M4 - `sf regress generate` from org metadata       | Not started               |           |
+| M5 - Self-healing failed steps                     | Not started               |           |
+
+## Next session - pick up here
+
+1. Finish M3's live checks (user runs these in a real terminal):
+   - Answer AI questions interactively: `sf regress create "Big deals should go through approval" --target-org regress-dev`
+   - Convert a real Word test plan: drop a .docx in `tests/drafts/`, run `sf regress convert --target-org regress-dev`
+2. Proposed next improvement: give the AI each object's active flows/triggers, and the visible page text when a browser step fails (see the "Contact Set Default LastName" follow-up below)
+3. Then M4 (`sf regress generate`)
+
+Housekeeping: CI (`.github/workflows/ci.yml`) builds and runs unit tests on every push. 5 Dependabot PRs opened before CI was replaced still carry the old failing `test.yml` - comment `@dependabot rebase` on each or close them. The `gh` CLI isn't installed locally.
 
 ## M1 - done
 
@@ -46,7 +56,7 @@ Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 - [ ] Recorder uses Playwright's private `_showRecorder`; Playwright is pinned to 1.64.1 and upgrades need a re-check
 - [ ] Optional AI pass to suggest extra assertions after recording (CLAUDE.md, Recording section)
 - [ ] `sf regress import` for Playwright / UI Script Recorder files (later)
-- [ ] `create`: interactive question answering only covered by unit tests - try it in a real terminal
+- [ ] `create` / `convert`: interactive question answering only covered by unit tests - try it in a real terminal
 - [ ] `create`: AI can request more objects, but objects named by a synonym ("deal") rely on the AI asking
 - [ ] AI authoring can't see org automation: the dev org's "Contact Set Default LastName" flow overwrites new contacts' last names, so a related-list check failed and the AI guessed at the cause. Add active record-triggered flows/triggers per object to the org context, and send visible page text with browser failures
 - [ ] `convert`: only tried live with Markdown; .docx is unit-tested with a small generated file - try a real Word test plan (tables, numbered lists)
@@ -54,7 +64,7 @@ Dev org: `regress-dev` (Developer Edition, "Agentforce Studio" console app).
 - [ ] Publishing: the plugin template's release/npm-publish workflows were removed (they need Salesforce's bot token). Add a release + npm publish workflow with our own npm account when ready
 - [ ] Default model is `claude-opus-5-5` (~6 cents per simple test); `--model claude-sonnet-5-5` is about half the price - compare quality on a few tests
 
-## M3 - in progress
+## M3 - built, live checks left
 
 Needs the user's own Anthropic API key.
 

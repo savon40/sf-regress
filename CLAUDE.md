@@ -26,12 +26,17 @@ Standalone product - not part of ForceClaw. ForceClaw may later wrap the engine.
 - API steps: `@salesforce/core` Connection (REST, Tooling, SOQL)
 - Browser steps: Playwright (Chromium). Log in via `/secur/frontdoor.jsp?sid=<accessToken>` using the existing session.
 - YAML parsing + validation: `yaml` + `zod`
+- AI authoring (M3): `@anthropic-ai/sdk`, structured output, default model `claude-opus-5-5` (`--model` to change). Key from `--api-key`, `ANTHROPIC_API_KEY`, or a gitignored `.env` - never stored or logged. The repo's own `.env` holds the developer's key and must never be committed
+- `.docx` reading: `mammoth`
+- Package manager: yarn (not npm - npm rewrites `yarn.lock`). CI: `.github/workflows/ci.yml` (build + lint + unit tests)
 
 ## Architecture
 
 - `src/engine/` - runner, step types, assertions, variables, cleanup. Must NOT import oclif or anything sf-CLI specific. It takes a Connection + options and returns results, so ForceClaw can reuse it later.
 - `src/commands/regress/` - thin oclif commands that load YAML, call the engine, print results
 - `src/browser/` - Playwright session + frontdoor login
+- `src/engine/author/` - AI authoring shared by `create` and `convert`: org metadata context, prompts, Anthropic model, draft splitting
+- `src/cli/` - CLI-only helpers (API key lookup, shared create/convert command code, terminal output)
 - `test/` - unit tests for the engine (mock Connection)
 
 ## Test file format (v1)
